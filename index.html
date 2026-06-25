@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Bringing Order Assessment</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue: #4A9FD4;
+      --charcoal: #3D3D3D;
+      --near-black: #1A1A1A;
+      --off-white: #F5F5F5;
+      --white: #FFFFFF;
+      --border: #E0E0E0;
+      --muted: #6F6F6F;
+      --green: #1D9E75;
+      --red: #E24B4A;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--near-black);
+      background: var(--off-white);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .page {
+      min-height: 100vh;
+      padding: 40px 16px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: 780px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.07);
+    }
+
+    .topbar {
+      height: 4px;
+      background: var(--blue);
+    }
+
+    .content {
+      padding: 52px 56px;
+    }
+
+    /* ── INTRO ─────────────────────────────────────── */
+
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 20px;
+    }
+
+    .intro-headline {
+      font-size: clamp(30px, 4vw, 44px);
+      font-weight: 500;
+      letter-spacing: -0.8px;
+      line-height: 1.1;
+      color: var(--near-black);
+      margin-bottom: 28px;
+    }
+
+    .intro-body {
+      font-size: 16px;
+      color: var(--charcoal);
+      line-height: 1.75;
+      margin-bottom: 16px;
+      max-width: 600px;
+    }
+
+    .intro-body strong {
+      color: var(--near-black);
+      font-weight: 500;
+    }
+
+    .time-note {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 8px;
+      margin-bottom: 36px;
+    }
+
+    /* ── PROGRESS ──────────────────────────────────── */
+
+    .progress-wrap {
+      margin-bottom: 44px;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 10px;
+      letter-spacing: 0.02em;
+    }
+
+    .progress-track {
+      height: 3px;
+      background: var(--off-white);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--blue);
+      transition: width 0.3s ease;
+    }
+
+    /* ── QUESTION ──────────────────────────────────── */
+
+    .q-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 14px;
+    }
+
+    .q-text {
+      font-size: clamp(22px, 3vw, 30px);
+      font-weight: 500;
+      letter-spacing: -0.4px;
+      line-height: 1.2;
+      color: var(--near-black);
+      margin-bottom: 32px;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .option {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--white);
+      border-radius: 10px;
+      padding: 16px 20px;
+      text-align: left;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--charcoal);
+      cursor: pointer;
+      line-height: 1.45;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+    }
+
+    .option:hover {
+      border-color: var(--blue);
+      color: var(--near-black);
+    }
+
+    .option.selected {
+      border-color: var(--blue);
+      background: rgba(74, 159, 212, 0.07);
+      color: var(--near-black);
+    }
+
+    /* ── NAV BUTTONS ───────────────────────────────── */
+
+    .nav-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 32px;
+    }
+
+    .btn {
+      appearance: none;
+      border: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 11px 22px;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+
+    .btn-primary {
+      background: var(--blue);
+      color: var(--white);
+      box-shadow: 0 6px 18px rgba(74,159,212,0.25);
+    }
+
+    .btn-secondary {
+      background: var(--off-white);
+      color: var(--charcoal);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      padding-left: 0;
+      font-weight: 400;
+    }
+
+    /* ── CONTACT GATE ──────────────────────────────── */
+
+    .gate-headline {
+      font-size: clamp(24px, 3vw, 34px);
+      font-weight: 500;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+      margin-bottom: 14px;
+    }
+
+    .gate-body {
+      font-size: 15px;
+      color: var(--charcoal);
+      line-height: 1.75;
+      margin-bottom: 28px;
+      max-width: 540px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 7px;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      color: var(--near-black);
+      background: var(--white);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(74,159,212,0.15);
+    }
+
+    .privacy-note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 16px;
+      line-height: 1.6;
+    }
+
+    /* ── RESULTS ───────────────────────────────────── */
+
+    .result-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 14px;
+    }
+
+    .result-headline {
+      font-size: clamp(26px, 3.5vw, 38px);
+      font-weight: 500;
+      letter-spacing: -0.6px;
+      line-height: 1.1;
+      color: var(--near-black);
+      margin-bottom: 32px;
+    }
+
+    .result-card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      background: var(--off-white);
+      margin-bottom: 32px;
+    }
+
+    .level-tag {
+      display: inline-block;
+      background: var(--charcoal);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      padding: 6px 14px;
+      margin-bottom: 24px;
+    }
+
+    .result-narrative {
+      font-size: 15px;
+      color: var(--charcoal);
+      line-height: 1.75;
+      margin-bottom: 12px;
+    }
+
+    .result-narrative + .result-narrative {
+      margin-top: 0;
+    }
+
+    .findings-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--near-black);
+      margin-top: 28px;
+      margin-bottom: 14px;
+    }
+
+    .findings {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .findings li {
+      font-size: 14px;
+      color: var(--charcoal);
+      line-height: 1.6;
+      padding-left: 22px;
+      position: relative;
+    }
+
+    .findings li::before {
+      content: "→";
+      position: absolute;
+      left: 0;
+      color: var(--blue);
+      font-weight: 500;
+    }
+
+    .insight-block {
+      border-left: 3px solid var(--blue);
+      padding: 16px 20px;
+      background: var(--white);
+      border-radius: 0 10px 10px 0;
+      margin-top: 28px;
+    }
+
+    .insight-block p {
+      font-size: 15px;
+      color: var(--near-black);
+      line-height: 1.7;
+      font-style: italic;
+    }
+
+    .result-cta-head {
+      font-size: clamp(22px, 2.5vw, 30px);
+      font-weight: 500;
+      letter-spacing: -0.4px;
+      line-height: 1.2;
+      color: var(--near-black);
+      margin-bottom: 12px;
+    }
+
+    .result-cta-body {
+      font-size: 15px;
+      color: var(--charcoal);
+      line-height: 1.75;
+      margin-bottom: 28px;
+      max-width: 560px;
+    }
+
+    .hidden { display: none; }
+
+    @media (max-width: 640px) {
+      .content { padding: 32px 24px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .nav-row { flex-direction: column; align-items: flex-start; }
+      .btn { width: 100%; text-align: center; }
+      .btn-ghost { width: auto; }
+    }
+  </style>
+</head>
+<body>
+<main class="page">
+  <section class="shell">
+    <div class="topbar"></div>
+    <div class="content">
+
+      <!-- INTRO -->
+      <div id="intro">
+        <div class="eyebrow">For CEOs, Owners, and Presidents</div>
+        <h1 class="intro-headline">You already know something isn't working. This will help you see what.</h1>
+        <p class="intro-body">Most leaders can feel it. Work that moves slower than it should. Problems that keep coming back. Good people who are quietly more frustrated than they let on.</p>
+        <p class="intro-body">This isn't about finding fault. It's about getting an honest look at how work actually moves through your company, and what it's costing you.</p>
+        <p class="intro-body"><strong>Ten questions. Straight answers. No score to study for.</strong></p>
+        <p class="time-note">Takes about 3 minutes.</p>
+        <button class="btn btn-primary" onclick="startAssessment()">Start the Assessment</button>
+      </div>
+
+      <!-- ASSESSMENT -->
+      <div id="assessment" class="hidden">
+        <div class="progress-wrap">
+          <div class="progress-meta">
+            <span id="progressLabel"></span>
+            <span id="sectionLabel"></span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+        </div>
+
+        <div class="q-label" id="qLabel"></div>
+        <h2 class="q-text" id="qText"></h2>
+        <div class="options" id="options"></div>
+
+        <div class="nav-row">
+          <button class="btn btn-secondary" id="backBtn" onclick="goBack()" style="display:none;">Back</button>
+          <button class="btn btn-ghost" onclick="restart()">Start over</button>
+        </div>
+      </div>
+
+      <!-- CONTACT GATE + RESULTS -->
+      <div id="results" class="hidden"></div>
+
+    </div>
+  </section>
+</main>
+
+<script>
+  const questions = [
+    // Profile
+    {
+      type: "profile",
+      question: "How many people work in your organization?",
+      options: ["1–10", "11–25", "26–50", "51–100", "101–250", "251+"]
+    },
+    {
+      type: "profile",
+      question: "How many of those people are responsible for leading others?",
+      options: ["1–2", "3–5", "6–10", "11–20", "21+"]
+    },
+
+    // Scored questions
+    {
+      type: "scored",
+      question: "How often do you follow up on work you assumed was already moving?",
+      options: [
+        { text: "Most days. It's become part of my routine.", score: 1 },
+        { text: "A few times a week.", score: 2 },
+        { text: "A few times a month.", score: 3 },
+        { text: "Occasionally. It surprises me when I have to.", score: 4 },
+        { text: "Rarely. Work moves without me chasing it.", score: 5 }
+      ]
+    },
+    {
+      type: "scored",
+      question: "When a significant problem surfaces, where does it usually land?",
+      options: [
+        { text: "On my desk. Almost everything finds its way to me.", score: 1 },
+        { text: "It eventually reaches me after a few people have touched it.", score: 2 },
+        { text: "My leaders handle it, but I usually need to stay close.", score: 3 },
+        { text: "The right person handles it and keeps me in the loop.", score: 4 },
+        { text: "It's handled before I even know about it.", score: 5 }
+      ]
+    },
+    {
+      type: "scored",
+      question: "If you asked your managers right now what the company's top three priorities are this week, how similar would their answers be?",
+      options: [
+        { text: "Very different. I'm not confident they'd agree on much.", score: 1 },
+        { text: "There'd be some overlap, but real gaps too.", score: 2 },
+        { text: "Mostly aligned, with a few differences.", score: 3 },
+        { text: "Closely aligned. Minor differences at most.", score: 4 },
+        { text: "Nearly identical. We have real alignment.", score: 5 }
+      ]
+    },
+    {
+      type: "scored",
+      question: "When a problem gets fixed, does it stay fixed?",
+      options: [
+        { text: "Rarely. The same issues keep coming back.", score: 1 },
+        { text: "Sometimes, but often in a different form.", score: 2 },
+        { text: "Usually, though it takes longer than it should.", score: 3 },
+        { text: "Most of the time. Recurring problems are the exception.", score: 4 },
+        { text: "Yes. When something is solved, it stays solved.", score: 5 }
+      ]
+    },
+    {
+      type: "scored",
+      question: "How confident are you that you know everything your teams are working on right now?",
+      options: [
+        { text: "Not confident. There's a lot I don't see.", score: 1 },
+        { text: "Somewhat confident, but I know I'm missing things.", score: 2 },
+        { text: "Mostly confident, with some gaps.", score: 3 },
+        { text: "Confident. Minor blind spots at most.", score: 4 },
+        { text: "Very confident. Work is visible across the organization.", score: 5 }
+      ]
+    },
+    {
+      type: "scored",
+      question: "How often do projects or requests take longer than expected?",
+      options: [
+        { text: "Almost always. Delays are the norm.", score: 1 },
+        { text: "Frequently. It's a persistent problem.", score: 2 },
+        { text: "Sometimes. Enough to be noticeable.", score: 3 },
+        { text: "Occasionally. We usually hit our timelines.", score: 4 },
+        { text: "Rarely. Delays are the exception.", score: 5 }
+      ]
+    },
+    {
+      type: "scored",
+      question: "How much of your week goes toward work you feel you shouldn't have to be involved in?",
+      options: [
+        { text: "A significant amount. It's hard to get ahead of it.", score: 1 },
+        { text: "More than I'd like. I step in often.", score: 2 },
+        { text: "Some. I'm more involved than I should be.", score: 3 },
+        { text: "Not much. I'm mostly focused on the right things.", score: 4 },
+        { text: "Very little. I'm leading, not managing the day-to-day.", score: 5 }
+      ]
+    },
+    {
+      type: "scored",
+      question: "When you think about your best people, the ones you can't afford to lose, how content do you think they actually are?",
+      options: [
+        { text: "I honestly worry about it. Some are probably closer to leaving than I know.", score: 1 },
+        { text: "I think some are frustrated, though they haven't said it outright.", score: 2 },
+        { text: "Mostly fine, but I sense there are things they're not saying.", score: 3 },
+        { text: "Generally content. A few things to address, but nothing serious.", score: 4 },
+        { text: "Genuinely satisfied. The environment reflects that.", score: 5 }
+      ]
+    },
+    {
+      type: "scored",
+      question: "Which of these feels most true about your company right now?",
+      options: [
+        { text: "We're working very hard, but it often feels like we're running in place.", score: 1 },
+        { text: "Different teams operate differently. There's no real common standard.", score: 2 },
+        { text: "We have good people, but the same problems keep consuming our time.", score: 3 },
+        { text: "Things work reasonably well. There's room to improve, but the foundation is solid.", score: 4 },
+        { text: "Work moves through the company predictably. We execute at a high level.", score: 5 }
+      ]
+    }
+  ];
+
+  // Result levels — named after what the CEO is experiencing, not a category they're sorted into
+  const results = {
+    carrying: {
+      label: "Carrying It Yourself",
+      narrative: [
+        "Your answers suggest you're shouldering a significant amount of weight that your organization should be carrying for you.",
+        "The work is getting done. But it's getting done because you and a few key people are compensating for a system that hasn't been built yet. That's an expensive way to run a company, and it only gets harder as you grow.",
+        "The problems you're experiencing aren't a reflection of the people on your team. They're a reflection of how work moves through the organization. That's the thing worth fixing."
+      ],
+      findings: [
+        "You're involved in work you shouldn't have to touch.",
+        "Problems are returning after they've been 'solved.'",
+        "Your best people may be more frustrated than they're letting on."
+      ],
+      insight: "The burden you're feeling isn't inevitable. It's the result of operating without a foundation. That foundation can be built. When it is, it changes how the whole organization feels.",
+      cta: "These results aren't the whole picture. They're a starting point. The most useful thing we can do now is talk about what stood out, what you recognized, and what's actually happening beneath the surface. There's no obligation, and we won't pretend there is."
+    },
+    patching: {
+      label: "Patching as You Go",
+      narrative: [
+        "Your organization has real capability, but it's inconsistent. Some teams execute well. Others rely on intervention. Some problems stay solved. Others keep coming back.",
+        "The business can grow from here, but growth is putting pressure on systems that were built for a smaller, simpler version of the company. What worked before is starting to show its limits.",
+        "The gap isn't people. It's the absence of a common standard for how work gets done, one that every team operates within regardless of who's leading them."
+      ],
+      findings: [
+        "Execution varies too much from team to team.",
+        "Improvement efforts are producing mixed results.",
+        "Leaders are not operating from the same playbook."
+      ],
+      insight: "You don't need to work harder. You need a common foundation that makes execution consistent, not dependent on who happens to be leading the team.",
+      cta: "These results aren't the whole picture. They're a starting point. The most useful thing we can do now is talk about what stood out, what you recognized, and what's actually happening beneath the surface. There's no obligation, and we won't pretend there is."
+    },
+    functioning: {
+      label: "Functioning, But Not Free",
+      narrative: [
+        "Your organization executes reasonably well. Work is mostly visible. Leaders are mostly aligned. Problems are mostly handled before they become serious.",
+        "But 'mostly' is doing a lot of work in those sentences. There's still drag. There are still blind spots. You're still more involved than you want to be.",
+        "The good news: you're not rebuilding from the ground up. The foundation exists. What's needed now is precision. Getting the system tight enough that the business runs the way you know it can."
+      ],
+      findings: [
+        "The foundation is solid. The execution isn't fully consistent.",
+        "You're still carrying more than you should.",
+        "There's meaningful improvement available without starting over."
+      ],
+      insight: "The gap between where you are and where you want to be is smaller than it looks. Closing it requires the same discipline that got you here, applied to the right places.",
+      cta: "These results aren't the whole picture. They're a starting point. The most useful thing we can do now is talk about what stood out, what you recognized, and what's actually happening beneath the surface. There's no obligation, and we won't pretend there is."
+    },
+    clear: {
+      label: "Operating with Clarity",
+      narrative: [
+        "Your organization has built something most companies haven't: a reliable system for how work gets done.",
+        "Work is visible. Leaders are aligned. Problems get solved and stay solved. You're focused on leading, not managing the day-to-day.",
+        "The highest-performing organizations don't get there and stop. They stay disciplined about the basics. That's what keeps it working."
+      ],
+      findings: [
+        "Execution is consistent across the organization.",
+        "Leadership is appropriately focused on the right work.",
+        "The foundation is strong and being maintained."
+      ],
+      insight: "The highest and best performing people and teams never leave the basics. What you've built is worth protecting.",
+      cta: "If your answers are accurate, you may not need Bringing Order in the traditional sense. The leaders Geoff has worked with who reach this level often find the question shifts. Not 'how do we fix this' but 'how do we take what works and bring it to more people.' Geoff is looking for a small number of leaders who believe in this approach enough to carry it further than he can alone. If that's where your head is, that's exactly the conversation we want to have."
+    }
+  };
+
+  let current = 0;
+  let answers = [];
+
+  function startAssessment() {
+    document.getElementById('intro').classList.add('hidden');
+    document.getElementById('assessment').classList.remove('hidden');
+    renderQuestion();
+  }
+
+  function renderQuestion() {
+    const q = questions[current];
+    const total = questions.length;
+    const scored = questions.filter(q => q.type === 'scored');
+    const scoredIndex = questions.slice(0, current + 1).filter(q => q.type === 'scored').length;
+    const isProfile = q.type === 'profile';
+    const progress = (current / total) * 100;
+
+    document.getElementById('progressBar').style.width = `${progress}%`;
+    document.getElementById('progressLabel').textContent = isProfile
+      ? `About your company`
+      : `Question ${scoredIndex} of ${scored.length}`;
+    document.getElementById('sectionLabel').textContent = isProfile ? '' : '';
+    document.getElementById('qLabel').textContent = isProfile ? 'About your company' : `Question ${scoredIndex} of ${scored.length}`;
+    document.getElementById('qText').textContent = q.question;
+    document.getElementById('backBtn').style.display = current === 0 ? 'none' : 'inline-block';
+
+    const optionsEl = document.getElementById('options');
+    optionsEl.innerHTML = '';
+
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option';
+      const text = typeof opt === 'string' ? opt : opt.text;
+      btn.textContent = text;
+      if (answers[current] && answers[current].index === i) btn.classList.add('selected');
+      btn.onclick = () => selectAnswer(i, opt);
+      optionsEl.appendChild(btn);
+    });
+  }
+
+  function selectAnswer(index, opt) {
+    const text = typeof opt === 'string' ? opt : opt.text;
+    const score = typeof opt === 'string' ? null : opt.score;
+    answers[current] = { index, text, score };
+
+    if (current < questions.length - 1) {
+      current++;
+      renderQuestion();
+    } else {
+      showGate();
+    }
+  }
+
+  function goBack() {
+    if (current > 0) { current--; renderQuestion(); }
+  }
+
+  function restart() {
+    current = 0;
+    answers = [];
+    document.getElementById('results').classList.add('hidden');
+    document.getElementById('assessment').classList.add('hidden');
+    document.getElementById('intro').classList.remove('hidden');
+  }
+
+  function getResultKey(score) {
+    if (score <= 20) return 'carrying';
+    if (score <= 32) return 'patching';
+    if (score <= 44) return 'functioning';
+    return 'clear';
+  }
+
+  function showGate() {
+    document.getElementById('assessment').classList.add('hidden');
+    const el = document.getElementById('results');
+    el.classList.remove('hidden');
+
+    el.innerHTML = `
+      <div class="eyebrow">One last step</div>
+      <h2 class="gate-headline">You've been honest. Let us be useful.</h2>
+      <p class="gate-body">Your results are ready. Leave your contact information and we'll send them somewhere they won't get lost. If what you read resonates, we can have a real conversation from there. No pressure. No pitch.</p>
+
+      <div class="form-grid">
+        <div>
+          <label for="fname">First name</label>
+          <input id="fname" name="fname" placeholder="Jane" required />
+        </div>
+        <div>
+          <label for="lname">Last name</label>
+          <input id="lname" name="lname" placeholder="Smith" required />
+        </div>
+        <div>
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" placeholder="jane@company.com" required />
+        </div>
+        <div>
+          <label for="phone">Phone</label>
+          <input id="phone" name="phone" placeholder="(555) 000-0000" />
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <label for="company">Company</label>
+          <input id="company" name="company" placeholder="Company name" />
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="showResults()">See my results</button>
+      <button class="btn btn-ghost" style="margin-left:16px;" onclick="restart()">Start over</button>
+
+      <p class="privacy-note">We don't sell your information or add you to a list without asking first.</p>
+    `;
+  }
+
+  function showResults() {
+    const scored = answers.filter(a => typeof a.score === 'number');
+    const total = scored.reduce((sum, a) => sum + a.score, 0);
+    const key = getResultKey(total);
+    const r = results[key];
+
+    document.getElementById('progressBar').style.width = '100%';
+    const el = document.getElementById('results');
+
+    el.innerHTML = `
+      <div class="result-label">Your Result</div>
+      <h2 class="result-headline">${r.label}</h2>
+
+      <div class="result-card">
+        <div class="level-tag">${r.label}</div>
+        ${r.narrative.map(p => `<p class="result-narrative">${p}</p>`).join('')}
+
+        <div class="findings-label">What this suggests</div>
+        <ul class="findings">
+          ${r.findings.map(f => `<li>${f}</li>`).join('')}
+        </ul>
+
+        <div class="insight-block">
+          <p>${r.insight}</p>
+        </div>
+      </div>
+
+      <h3 class="result-cta-head">Let's have an honest conversation.</h3>
+      <p class="result-cta-body">${r.cta}</p>
+
+      <button class="btn btn-primary" onclick="restart()">Retake the assessment</button>
+    `;
+  }
+</script>
+</body>
+</html>
