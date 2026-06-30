@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bringing Order: Goals & Priorities Survey</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --blue: #4A9FD4;
+    --charcoal: #3D3D3D;
+    --near-black: #1A1A1A;
+    --off-white: #F5F5F5;
+    --white: #FFFFFF;
+    --border: #E0E0E0;
+    --muted: #6F6F6F;
+    --green: #1D9E75;
+    --red: #E24B4A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--near-black);
+    background: var(--off-white);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  .page { min-height: 100vh; padding: 40px 16px; display: flex; align-items: flex-start; justify-content: center; }
+  .shell { width: 100%; max-width: 780px; background: var(--white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,0.07); }
+  .topbar { height: 4px; background: var(--blue); }
+  .content { padding: 52px 56px; }
+
+  .eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); margin-bottom: 20px; }
+  .intro-headline { font-size: clamp(28px, 4vw, 40px); font-weight: 500; letter-spacing: -0.7px; line-height: 1.15; color: var(--near-black); margin-bottom: 24px; }
+  .intro-body { font-size: 16px; color: var(--charcoal); line-height: 1.75; margin-bottom: 16px; max-width: 600px; }
+  .intro-body strong { color: var(--near-black); font-weight: 500; }
+  .time-note { font-size: 13px; color: var(--muted); margin-top: 4px; margin-bottom: 32px; }
+
+  .name-row { display: flex; gap: 12px; margin-bottom: 32px; }
+  .name-btn { flex: 1; appearance: none; border: 1px solid var(--border); background: var(--white); border-radius: 10px; padding: 18px; text-align: center; font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 500; color: var(--charcoal); cursor: pointer; transition: border-color .15s, background .15s, color .15s; }
+  .name-btn:hover { border-color: var(--blue); color: var(--near-black); }
+  .name-btn.selected { border-color: var(--blue); background: rgba(74,159,212,0.08); color: var(--near-black); }
+
+  .progress-wrap { margin-bottom: 40px; }
+  .progress-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .progress-track { height: 3px; background: var(--off-white); border-radius: 999px; overflow: hidden; }
+  .progress-bar { height: 100%; width: 0%; background: var(--blue); transition: width .3s ease; }
+
+  .q-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); margin-bottom: 14px; }
+  .q-text { font-size: clamp(22px, 3vw, 28px); font-weight: 500; letter-spacing: -0.4px; line-height: 1.2; color: var(--near-black); margin-bottom: 16px; }
+  .q-context { font-size: 14px; color: var(--charcoal); line-height: 1.65; margin-bottom: 28px; max-width: 600px; }
+
+  .field-group { margin-bottom: 24px; }
+  .field-label { font-size: 14px; font-weight: 500; color: var(--near-black); margin-bottom: 8px; line-height: 1.5; }
+  textarea { width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; font-family: 'Inter', sans-serif; font-size: 14.5px; color: var(--near-black); background: var(--white); resize: vertical; min-height: 64px; line-height: 1.6; }
+  textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(74,159,212,0.15); }
+
+  .scale-row { display: flex; gap: 8px; margin-bottom: 28px; }
+  .scale-btn { flex: 1; appearance: none; border: 1px solid var(--border); background: var(--white); border-radius: 10px; padding: 14px 6px; text-align: center; cursor: pointer; transition: border-color .15s, background .15s; }
+  .scale-btn .num { font-size: 18px; font-weight: 500; color: var(--near-black); display: block; margin-bottom: 4px; }
+  .scale-btn .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; display: block; }
+  .scale-btn:hover { border-color: var(--blue); }
+  .scale-btn.selected { border-color: var(--blue); background: rgba(74,159,212,0.08); }
+  .scale-btn.selected .num { color: var(--blue); }
+
+  .nav-row { display: flex; align-items: center; gap: 16px; margin-top: 8px; }
+  .btn { appearance: none; border: none; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; border-radius: 999px; padding: 12px 26px; transition: transform .1s, box-shadow .1s; }
+  .btn:hover { transform: translateY(-1px); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-primary { background: var(--blue); color: var(--white); box-shadow: 0 6px 18px rgba(74,159,212,0.25); }
+  .btn-secondary { background: var(--off-white); color: var(--charcoal); border: 1px solid var(--border); }
+  .btn-ghost { background: transparent; color: var(--muted); padding-left: 0; font-weight: 400; }
+
+  .done-icon { width: 48px; height: 48px; border-radius: 50%; background: rgba(29,158,117,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 24px; font-size: 22px; color: var(--green); }
+  .final-body { font-size: 15px; color: var(--charcoal); line-height: 1.75; margin-bottom: 14px; max-width: 560px; }
+  .email-box { border: 1px solid var(--border); background: var(--off-white); border-radius: 10px; padding: 16px 20px; margin: 24px 0; font-size: 14px; color: var(--near-black); }
+  .email-box strong { color: var(--blue); }
+  .steps-list { margin: 16px 0 28px; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .steps-list li { font-size: 14px; color: var(--charcoal); line-height: 1.6; padding-left: 26px; position: relative; }
+  .steps-list li::before { content: counter(step); counter-increment: step; position: absolute; left: 0; top: 0; width: 18px; height: 18px; border-radius: 50%; background: var(--blue); color: var(--white); font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; }
+  .steps-list { counter-reset: step; }
+
+  .hidden { display: none; }
+
+  @media (max-width: 640px) {
+    .content { padding: 32px 24px; }
+    .nav-row { flex-direction: column; align-items: flex-start; }
+    .btn { width: 100%; text-align: center; }
+    .btn-ghost { width: auto; }
+    .scale-row { flex-wrap: wrap; }
+    .scale-btn { flex: 1 1 30%; }
+    .name-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+  <section class="shell">
+    <div class="topbar"></div>
+    <div class="content">
+
+      <!-- INTRO -->
+      <div id="intro">
+        <div class="eyebrow">For Ricky and Faith: Complete Separately</div>
+        <h1 class="intro-headline">Where do you want this business to go?</h1>
+        <p class="intro-body">We've already talked through what isn't working day to day. This is about something different: where each of you wants the business to go, and what matters most to you in getting there.</p>
+        <p class="intro-body">Fill this out on your own, without comparing notes with each other first. We want your view, not a blended one. Once we've seen both, we'll bring it together and use it to shape the plan.</p>
+        <p class="intro-body"><strong>There's no wrong answer here. The more direct you are, the more useful this is.</strong></p>
+        <p class="time-note">Takes about 15 to 30 minutes. Thoughtful answers matter more than fast ones.</p>
+
+        <div class="field-label" style="margin-bottom:12px;">Who's completing this?</div>
+        <div class="name-row" id="nameRow">
+          <button class="name-btn" data-name="Ricky" onclick="selectName('Ricky')">Ricky</button>
+          <button class="name-btn" data-name="Faith" onclick="selectName('Faith')">Faith</button>
+        </div>
+
+        <button class="btn btn-primary" id="startBtn" onclick="startSurvey()" disabled>Start the Survey</button>
+      </div>
+
+      <!-- SURVEY -->
+      <div id="survey" class="hidden">
+        <div class="progress-wrap">
+          <div class="progress-meta">
+            <span id="progressLabel"></span>
+            <span></span>
+          </div>
+          <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+        </div>
+
+        <div class="q-label" id="qLabel"></div>
+        <h2 class="q-text" id="qText"></h2>
+        <div class="q-label hidden" id="qContextLabel">Issue Summary</div>
+        <p class="q-context hidden" id="qContext"></p>
+
+        <div id="qBody"></div>
+
+        <div class="nav-row">
+          <button class="btn btn-secondary" id="backBtn" onclick="goBack()">Back</button>
+          <button class="btn btn-primary" id="nextBtn" onclick="goNext()">Continue</button>
+        </div>
+        <p id="validationMsg" class="hidden" style="color: var(--red); font-size: 13px; margin-top: 14px;">Please complete all fields before continuing.</p>
+      </div>
+
+      <!-- FINAL -->
+      <div id="final" class="hidden"></div>
+
+    </div>
+  </section>
+</main>
+
+<script>
+  let respondentName = null;
+  let current = 0;
+  const responses = {}; // keyed by step id
+
+  // ---- Steps ----
+  const steps = [
+    { id: 'impact', type: 'multifield', label: 'Impact', title: 'How do you want your business to be identified?',
+      fields: [
+        { key: 'impact1', label: 'Three to five years from now, what do you want your business known for?' },
+        { key: 'impact2', label: 'Outside of money, what does success look like in the business for you personally?' },
+        { key: 'impact3', label: 'How do you want those working with you (subs, employees, customers) to feel about working with you?' }
+      ]
+    },
+    { id: 'time', type: 'multifield', label: 'Time', title: 'What is an ideal use of your time?',
+      fields: [
+        { key: 'time1', label: 'If you got back 10 hours a week starting tomorrow, what would you do with it?' },
+        { key: 'time2', label: 'What does a sustainable work week look like for you? Hours, days off, anything specific?' },
+        { key: 'time3', label: 'What\u2019s one thing you do today that you want completely off your plate within the next year?' }
+      ]
+    },
+    { id: 'fin', type: 'multifield', label: 'Financial', title: 'What do you want to achieve financially?',
+      fields: [
+        { key: 'fin1', label: 'What revenue are you aiming for in the next 12 months? In 3 years, if you had to put a number on it?' },
+        { key: 'fin2', label: 'What is the profit margin you are targeting? Define in percentage or total dollars.' },
+        { key: 'fin3', label: 'Where does cash flow feel the most tight right now? And what do you think needs to change for that to ease up?' }
+      ]
+    },
+    { id: 'info_issues', type: 'info', label: 'Before You Continue', title: 'How to fill out issues section',
+      paragraphs: [
+        'The next 10 questions each cover a specific issue we\u2019ve heard come up in the business. For each one, you\u2019ll do two things.'
+      ],
+      stepsList: [
+        'Rate it from 1 to 5. How much of a priority is it to fix this right now? 1 means it\u2019s not a priority, 5 means it\u2019s urgent.',
+        'Write a few sentences expanding on it. Is this recurring or a one-time thing? What does it cost you in time, money, or quality of work? A specific example helps.'
+      ],
+      closing: 'Don\u2019t overthink the rating. Go with your gut. The real value for us is in what you write underneath it.'
+    },
+    { id: 'i1', type: 'issue', label: 'Issue 1 of 10', title: 'Scheduling and communication',
+      context: 'Right now, scheduling subs and vendors and informing them happens very manually. This is similar to Ricky\u2019s schedule too. A central location to view and manage is currently missing.' },
+    { id: 'i2', type: 'issue', label: 'Issue 2 of 10', title: 'Shared access to sub and vendor contacts',
+      context: 'The two of you don\u2019t have equal access to the same list of subs and vendors.' },
+    { id: 'i3', type: 'issue', label: 'Issue 3 of 10', title: 'A record to look back on',
+      context: 'There\u2019s no central space to review past jobs, decisions, and conversations to use as reference moving forward.' },
+    { id: 'i4', type: 'issue', label: 'Issue 4 of 10', title: 'Estimating speed and consistency',
+      context: 'Estimates take real time to put together, and there isn\u2019t a standard template for common job types like a half bath, master bath, or flooring.' },
+    { id: 'i5', type: 'issue', label: 'Issue 5 of 10', title: 'Following up with leads and past clients',
+      context: 'There\u2019s no system for following up with people who received an estimate but haven\u2019t booked, or past clients who might need more work.' },
+    { id: 'i6', type: 'issue', label: 'Issue 6 of 10', title: 'Project photos in one place',
+      context: 'Photos from job sites and estimates are scattered across devices instead of in a central location everyone can access.' },
+    { id: 'i7', type: 'issue', label: 'Issue 7 of 10', title: 'Measuring sub or employee performance',
+      context: 'When a sub or employee isn\u2019t performing or fails to show up, the resolution falls on Ricky and Faith. This is not sustainable as growth continues.' },
+    { id: 'i8', type: 'issue', label: 'Issue 8 of 10', title: 'Vetting new subs before they\u2019re on a job',
+      context: 'New subs are now going through a process of evaluation. Embedding this to ensure all future team members follow the same process will be key during growth and expansion.' },
+    { id: 'i9', type: 'issue', label: 'Issue 9 of 10', title: 'Sub or vendor selection with cost protection',
+      context: 'Decisions about which sub to call for a task and the expected cost get made based on individual experience. A system for this will be very helpful as growth and expansion happens.' },
+    { id: 'i10', type: 'issue', label: 'Issue 10 of 10', title: 'Coordinating multiple crews and trades on a job',
+      context: 'As more crews and trades run through a project (demo, plumbing, electrical, drywall) the system / process for coordination should be available for all to follow.' }
+  ];
+
+  function selectName(name) {
+    respondentName = name;
+    document.querySelectorAll('.name-btn').forEach(b => b.classList.toggle('selected', b.dataset.name === name));
+    document.getElementById('startBtn').disabled = false;
+  }
+
+  function startSurvey() {
+    document.getElementById('intro').classList.add('hidden');
+    document.getElementById('survey').classList.remove('hidden');
+    renderStep();
+  }
+
+  function renderStep() {
+    const s = steps[current];
+    const progress = (current / steps.length) * 100;
+    document.getElementById('progressBar').style.width = progress + '%';
+    document.getElementById('progressLabel').textContent = 'Question ' + (current + 1) + ' of ' + steps.length;
+    document.getElementById('qLabel').textContent = s.label;
+    document.getElementById('qText').textContent = s.title;
+
+    const ctxLabelEl = document.getElementById('qContextLabel');
+    const ctxEl = document.getElementById('qContext');
+    if (s.context) {
+      ctxLabelEl.classList.remove('hidden');
+      ctxEl.textContent = s.context;
+      ctxEl.classList.remove('hidden');
+    } else {
+      ctxLabelEl.classList.add('hidden');
+      ctxEl.classList.add('hidden');
+    }
+
+    const body = document.getElementById('qBody');
+    body.innerHTML = '';
+
+    if (s.type === 'multifield') {
+      s.fields.forEach(f => {
+        const wrap = document.createElement('div');
+        wrap.className = 'field-group';
+        const lbl = document.createElement('div');
+        lbl.className = 'field-label';
+        lbl.textContent = f.label;
+        const ta = document.createElement('textarea');
+        ta.id = 'field_' + f.key;
+        ta.value = responses[f.key] || '';
+        ta.placeholder = 'Type your answer here...';
+        ta.oninput = () => { responses[f.key] = ta.value; };
+        wrap.appendChild(lbl);
+        wrap.appendChild(ta);
+        body.appendChild(wrap);
+      });
+    } else if (s.type === 'issue') {
+      const scaleLabel = document.createElement('div');
+      scaleLabel.className = 'field-label';
+      scaleLabel.textContent = 'How much of a priority is fixing this right now?';
+      body.appendChild(scaleLabel);
+
+      const scaleRow = document.createElement('div');
+      scaleRow.className = 'scale-row';
+      const labels = ['Not a\npriority', '', '', '', 'Urgent'];
+      for (let i = 1; i <= 5; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'scale-btn';
+        if (responses[s.id + '_score'] === i) btn.classList.add('selected');
+        btn.innerHTML = '<span class="num">' + i + '</span><span class="lbl">' + (labels[i-1] || '') + '</span>';
+        btn.onclick = () => {
+          responses[s.id + '_score'] = i;
+          scaleRow.querySelectorAll('.scale-btn').forEach((b, idx) => b.classList.toggle('selected', idx === i - 1));
+        };
+        scaleRow.appendChild(btn);
+      }
+      body.appendChild(scaleRow);
+
+      const expLabel = document.createElement('div');
+      expLabel.className = 'field-label';
+      expLabel.textContent = 'Tell us more. Specific examples help.';
+      body.appendChild(expLabel);
+
+      const ta = document.createElement('textarea');
+      ta.style.minHeight = '110px';
+      ta.value = responses[s.id + '_text'] || '';
+      ta.placeholder = 'Type your answer here...';
+      ta.oninput = () => { responses[s.id + '_text'] = ta.value; };
+      body.appendChild(ta);
+    } else if (s.type === 'info') {
+      if (s.paragraphs) {
+        s.paragraphs.forEach(p => {
+          const para = document.createElement('p');
+          para.className = 'final-body';
+          para.textContent = p;
+          body.appendChild(para);
+        });
+      }
+      if (s.stepsList) {
+        const ul = document.createElement('ul');
+        ul.className = 'steps-list';
+        ul.style.margin = '8px 0 24px';
+        s.stepsList.forEach(item => {
+          const li = document.createElement('li');
+          li.textContent = item;
+          ul.appendChild(li);
+        });
+        body.appendChild(ul);
+      }
+      if (s.closing) {
+        const closing = document.createElement('p');
+        closing.className = 'final-body';
+        closing.innerHTML = '<strong>' + s.closing + '</strong>';
+        body.appendChild(closing);
+      }
+    }
+
+    document.getElementById('backBtn').style.display = current === 0 ? 'none' : 'inline-block';
+    document.getElementById('nextBtn').textContent = current === steps.length - 1 ? 'Finish' : 'Continue';
+    document.getElementById('validationMsg').classList.add('hidden');
+  }
+
+  function isStepComplete() {
+    const s = steps[current];
+    if (s.type === 'multifield') {
+      return s.fields.every(f => responses[f.key] && responses[f.key].trim().length > 0);
+    }
+    if (s.type === 'issue') {
+      const hasScore = !!responses[s.id + '_score'];
+      const hasText = responses[s.id + '_text'] && responses[s.id + '_text'].trim().length > 0;
+      return hasScore && hasText;
+    }
+    return true; // info steps have nothing to fill out
+  }
+
+  function goNext() {
+    if (!isStepComplete()) {
+      document.getElementById('validationMsg').classList.remove('hidden');
+      return;
+    }
+    if (current < steps.length - 1) { current++; renderStep(); window.scrollTo(0,0); }
+    else { showFinal(); }
+  }
+
+  function goBack() {
+    if (current > 0) { current--; renderStep(); window.scrollTo(0,0); }
+  }
+
+  function showFinal() {
+    document.getElementById('survey').classList.add('hidden');
+    const el = document.getElementById('final');
+    el.classList.remove('hidden');
+    el.innerHTML = `
+      <div class="done-icon">&#10003;</div>
+      <h2 class="intro-headline" style="font-size: clamp(24px, 3vw, 32px);">That's it. Thank you, ${respondentName}.</h2>
+      <p class="final-body">Your answers are ready. Download the PDF below and then send to Geoff.</p>
+
+      <button class="btn btn-primary" onclick="downloadPDF()">Download PDF Summary</button>
+
+      <div class="email-box">
+        <strong>Next step:</strong> Once your PDF has downloaded, attach it to an email and send it to<br><strong>geoff@bringingorder.com</strong>.
+      </div>
+
+      <ul class="steps-list">
+        <li>Click the button above to download your PDF.</li>
+        <li>Open your email and start a new message to geoff@bringingorder.com.</li>
+        <li>Attach the downloaded PDF file.</li>
+        <li>Send it. No need to write anything else, the PDF has everything.</li>
+      </ul>
+    `;
+  }
+
+  function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+    const marginLeft = 56;
+    const maxWidth = 500;
+    let y = 64;
+    const pageHeight = 740;
+
+    function ensureSpace(lines) {
+      if (y + (lines * 14) > pageHeight) { doc.addPage(); y = 64; }
+    }
+
+    function writeHeading(text, size) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(size);
+      doc.setTextColor(26, 26, 26);
+      const lines = doc.splitTextToSize(text, maxWidth);
+      ensureSpace(lines.length + 1);
+      doc.text(lines, marginLeft, y);
+      y += lines.length * (size * 1.3) + 6;
+    }
+
+    function writeLabel(text) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(74, 159, 212);
+      const lines = doc.splitTextToSize(text.toUpperCase(), maxWidth);
+      ensureSpace(lines.length + 1);
+      doc.text(lines, marginLeft, y);
+      y += lines.length * 13 + 4;
+    }
+
+    function writeBody(text) {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      doc.setTextColor(61, 61, 61);
+      const safe = text && text.trim() ? text : '(No answer provided)';
+      const lines = doc.splitTextToSize(safe, maxWidth);
+      ensureSpace(lines.length + 1);
+      doc.text(lines, marginLeft, y);
+      y += lines.length * 14 + 16;
+    }
+
+    writeHeading('Bringing Order: Goals & Priorities Survey', 16);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(111, 111, 111);
+    doc.text('Completed by: ' + respondentName + '   |   Date: ' + new Date().toLocaleDateString(), marginLeft, y);
+    y += 28;
+
+    steps.forEach(s => {
+      if (s.type === 'multifield') {
+        writeHeading(s.title, 13);
+        s.fields.forEach(f => {
+          writeLabel(f.label);
+          writeBody(responses[f.key]);
+        });
+      } else if (s.type === 'issue') {
+        writeHeading(s.title, 13);
+        const score = responses[s.id + '_score'];
+        writeLabel('Priority rating (1 = not a priority, 5 = urgent): ' + (score ? score : 'Not answered'));
+        writeLabel('Details');
+        writeBody(responses[s.id + '_text']);
+      }
+      y += 6;
+    });
+
+    doc.save('Bringing-Order-Survey-' + respondentName + '.pdf');
+  }
+</script>
+</body>
+</html>
