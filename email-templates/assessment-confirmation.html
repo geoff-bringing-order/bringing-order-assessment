@@ -1,0 +1,84 @@
+<!--
+  Bringing Order Assessment — confirmation email
+  Pasted into the GHL workflow "Send Email" action (code view).
+
+  Notes:
+  - Merge fields are GHL tokens: {{contact.first_name}}, {{contact.assessment_result}}
+  - Button links to the GHL calendar booking widget.
+  - Unsubscribe link is NOT included here — GHL's default LC-Email setting
+    auto-appends a compliant unsubscribe link at send time.
+  - Physical mailing address is included in the footer for CAN-SPAM compliance.
+-->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F5F5F5; margin:0; padding:0;">
+  <tr>
+    <td align="center" style="padding:24px 12px;">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; width:100%; background:#FFFFFF; border:1px solid #E0E0E0; border-radius:12px; overflow:hidden;">
+        <!-- top accent bar -->
+        <tr><td style="height:4px; background:#4A9FD4; line-height:4px; font-size:0;">&nbsp;</td></tr>
+        <tr>
+          <td style="padding:40px 44px; font-family:'Inter', Arial, Helvetica, sans-serif; color:#3D3D3D;">
+
+            <p style="margin:0 0 20px; font-size:16px; line-height:1.6; color:#1A1A1A;">
+              Hi {{contact.first_name}},
+            </p>
+
+            <p style="margin:0 0 18px; font-size:15px; line-height:1.7; color:#3D3D3D;">
+              Thank you for taking the Bringing Order Assessment. Your responses came through, and based on your answers, your result was
+              <strong style="color:#1A1A1A;">{{contact.assessment_result}}</strong>.
+            </p>
+
+            <p style="margin:0 0 18px; font-size:15px; line-height:1.7; color:#3D3D3D;">
+              These results are a starting point, not the whole picture. The most useful next step is a short, no-pressure conversation about what stood out to you and what's actually happening beneath the surface.
+            </p>
+
+            <p style="margin:0 0 26px; font-size:15px; line-height:1.7; color:#3D3D3D;">
+              If you'd like to do that, grab a time that works for you:
+            </p>
+
+            <!-- bulletproof button -->
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 28px;">
+              <tr>
+                <td align="center" bgcolor="#4A9FD4" style="border-radius:999px;">
+                  <a href="https://api.leadconnectorhq.com/widget/booking/b22fMZA0ac0pEmAv57Mx" target="_blank"
+                     style="display:inline-block; padding:14px 34px; font-family:'Inter', Arial, Helvetica, sans-serif; font-size:15px; font-weight:600; line-height:1; color:#FFFFFF; text-decoration:none; border-radius:999px;">
+                    Schedule a Meeting
+                  </a>
+                </td>
+              </tr>
+            </table>
+
+            <p style="margin:0 0 22px; font-size:13px; line-height:1.6; color:#6F6F6F;">
+              Or copy this link into your browser:<br>
+              <a href="https://api.leadconnectorhq.com/widget/booking/b22fMZA0ac0pEmAv57Mx" target="_blank" style="color:#4A9FD4; text-decoration:underline; word-break:break-all;">https://api.leadconnectorhq.com/widget/booking/b22fMZA0ac0pEmAv57Mx</a>
+            </p>
+
+            <p style="margin:0 0 24px; font-size:15px; line-height:1.7; color:#3D3D3D;">
+              If now isn't the right time, no problem at all. The results are yours to keep either way.
+            </p>
+
+            <p style="margin:0; font-size:15px; line-height:1.7; color:#1A1A1A;">— Geoff</p>
+
+          </td>
+        </tr>
+      </table>
+
+      <!-- COMPLIANCE FOOTER (address; GHL auto-appends the unsubscribe link) -->
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; width:100%;">
+        <tr>
+          <td style="padding:20px 44px 8px; font-family:'Inter', Arial, Helvetica, sans-serif; text-align:center;">
+            <p style="margin:0 0 8px; font-size:12px; line-height:1.6; color:#6F6F6F;">
+              You're receiving this email because you completed the Bringing Order Assessment at
+              <a href="https://assessment.bringingorder.com" target="_blank" style="color:#6F6F6F; text-decoration:underline;">assessment.bringingorder.com</a>.
+            </p>
+            <p style="margin:0; font-size:12px; line-height:1.6; color:#6F6F6F;">
+              <strong style="color:#3D3D3D;">Bringing Order</strong><br>
+              1320 Parma Drive<br>
+              Lewisville, TX 75077
+            </p>
+          </td>
+        </tr>
+      </table>
+
+    </td>
+  </tr>
+</table>
