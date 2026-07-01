@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The Bringing Order Assessment</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root {
       --blue: #4A9FD4;
@@ -637,6 +638,7 @@
 
   let current = 0;
   let answers = [];
+  let contactInfo = {};
 
   function startAssessment() {
     document.getElementById('intro').classList.add('hidden');
@@ -756,7 +758,14 @@
   }
 
   function buildSummary(label, total) {
-    let out = '';
+    const r = results[getResultKey(total)];
+    let out = 'YOUR RESULT: ' + label + ' (total score ' + total + ' of 45)\n\n';
+    r.narrative.forEach(p => { out += p + '\n\n'; });
+    out += 'WHAT THIS SUGGESTS\n';
+    r.findings.forEach(f => { out += '- ' + f + '\n'; });
+    out += '\n' + r.insight + '\n\n';
+    out += '----------------------------------------\n\n';
+
     const profile = questions
       .map((q, i) => ({ q, a: answers[i] }))
       .filter(x => x.q.type === 'profile');
@@ -766,7 +775,8 @@
         out += x.q.question + '\n-> ' + (x.a ? x.a.text : '(no answer)') + '\n\n';
       });
     }
-    out += 'ASSESSMENT RESPONSES\n';
+
+    out += 'YOUR RESPONSES\n';
     let n = 0;
     questions.forEach((q, i) => {
       if (q.type !== 'scored') return;
@@ -775,8 +785,7 @@
       out += 'Q' + n + '. ' + q.question + '\n-> '
         + (a ? a.text + ' (score ' + a.score + ')' : '(no answer)') + '\n\n';
     });
-    out += 'RESULT: ' + label + ' (total score ' + total + ')';
-    return out;
+    return out.trim();
   }
 
   async function submitGate() {
@@ -796,6 +805,7 @@
       return;
     }
     errEl.classList.add('hidden');
+    contactInfo = { firstName: fname, lastName: lname, email: email, phone: phone, company: company };
 
     const { total, label } = computeResult();
 
@@ -856,8 +866,73 @@
       <h3 class="result-cta-head">Let's have an honest conversation.</h3>
       <p class="result-cta-body">${r.cta}</p>
 
-      <button class="btn btn-primary" onclick="restart()">Retake the assessment</button>
+      <button class="btn btn-primary" onclick="downloadResultsPDF()">Download your results (PDF)</button>
+      <button class="btn btn-ghost" style="margin-left:16px;" onclick="restart()">Retake the assessment</button>
     `;
+  }
+
+  function downloadResultsPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+    const marginLeft = 56;
+    const maxWidth = 500;
+    let y = 64;
+    const pageHeight = 740;
+
+    function ensureSpace(lines) {
+      if (y + (lines * 14) > pageHeight) { doc.addPage(); y = 64; }
+    }
+    function writeHeading(text, size) {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(size); doc.setTextColor(26, 26, 26);
+      const lines = doc.splitTextToSize(text, maxWidth); ensureSpace(lines.length + 1);
+      doc.text(lines, marginLeft, y); y += lines.length * (size * 1.3) + 6;
+    }
+    function writeLabel(text) {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(74, 159, 212);
+      const lines = doc.splitTextToSize(text.toUpperCase(), maxWidth); ensureSpace(lines.length + 1);
+      doc.text(lines, marginLeft, y); y += lines.length * 13 + 4;
+    }
+    function writeBody(text) {
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(61, 61, 61);
+      const safe = text && String(text).trim() ? String(text) : '(No answer provided)';
+      const lines = doc.splitTextToSize(safe, maxWidth); ensureSpace(lines.length + 1);
+      doc.text(lines, marginLeft, y); y += lines.length * 14 + 16;
+    }
+
+    const { total, key, label } = computeResult();
+    const r = results[key];
+    const name = ((contactInfo.firstName || '') + ' ' + (contactInfo.lastName || '')).trim();
+
+    writeHeading('The Bringing Order Assessment', 16);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(111, 111, 111);
+    doc.text((name ? 'Prepared for: ' + name + '   |   ' : '') + 'Date: ' + new Date().toLocaleDateString(), marginLeft, y);
+    y += 28;
+
+    writeLabel('Your Result');
+    writeHeading(label, 15);
+    writeLabel('Total score: ' + total + ' of 45');
+    r.narrative.forEach(p => writeBody(p));
+    writeLabel('What this suggests');
+    r.findings.forEach(f => writeBody('- ' + f));
+    writeBody(r.insight);
+
+    y += 6;
+    writeHeading('Your Responses', 13);
+    let n = 0;
+    questions.forEach((q, i) => {
+      const a = answers[i];
+      if (q.type === 'profile') {
+        writeLabel(q.question);
+        writeBody(a ? a.text : '(no answer)');
+      } else if (q.type === 'scored') {
+        n++;
+        writeLabel('Q' + n + '. ' + q.question);
+        writeBody((a ? a.text : '(no answer)') + (a && a.score != null ? '  (score ' + a.score + ' of 5)' : ''));
+      }
+    });
+
+    const fnameSafe = (contactInfo.firstName || 'results').replace(/[^a-z0-9]/gi, '-');
+    doc.save('Bringing-Order-Assessment-' + fnameSafe + '.pdf');
   }
 </script>
 </body>
