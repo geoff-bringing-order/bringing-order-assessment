@@ -633,6 +633,8 @@
     }
   };
 
+  const WEBHOOK_URL = "https://services.leadconnectorhq.com/hooks/d9WyNmOEFZOkAWyXfeJA/webhook-trigger/c0854655-8145-49a2-a6e6-a2d40a2aab15";
+
   let current = 0;
   let answers = [];
 
@@ -738,17 +740,96 @@
         </div>
       </div>
 
-      <button class="btn btn-primary" onclick="showResults()">See my results</button>
+      <button class="btn btn-primary" id="gateSubmitBtn" onclick="submitGate()">See my results</button>
       <button class="btn btn-ghost" style="margin-left:16px;" onclick="restart()">Start over</button>
 
+      <p id="gateError" class="hidden" style="color: var(--red); font-size: 13px; margin-top: 14px;">Please complete the required fields.</p>
       <p class="privacy-note">We don't sell your information or add you to a list without asking first.</p>
     `;
   }
 
-  function showResults() {
-    const scored = answers.filter(a => typeof a.score === 'number');
+  function computeResult() {
+    const scored = answers.filter(a => a && typeof a.score === 'number');
     const total = scored.reduce((sum, a) => sum + a.score, 0);
     const key = getResultKey(total);
+    return { total, key, label: results[key].label };
+  }
+
+  function buildSummary(label, total) {
+    let out = '';
+    const profile = questions
+      .map((q, i) => ({ q, a: answers[i] }))
+      .filter(x => x.q.type === 'profile');
+    if (profile.length) {
+      out += 'ABOUT YOUR COMPANY\n';
+      profile.forEach(x => {
+        out += x.q.question + '\n-> ' + (x.a ? x.a.text : '(no answer)') + '\n\n';
+      });
+    }
+    out += 'ASSESSMENT RESPONSES\n';
+    let n = 0;
+    questions.forEach((q, i) => {
+      if (q.type !== 'scored') return;
+      n++;
+      const a = answers[i];
+      out += 'Q' + n + '. ' + q.question + '\n-> '
+        + (a ? a.text + ' (score ' + a.score + ')' : '(no answer)') + '\n\n';
+    });
+    out += 'RESULT: ' + label + ' (total score ' + total + ')';
+    return out;
+  }
+
+  async function submitGate() {
+    const fname = document.getElementById('fname').value.trim();
+    const lname = document.getElementById('lname').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const company = document.getElementById('company').value.trim();
+    const errEl = document.getElementById('gateError');
+
+    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!fname || !lname || !emailValid) {
+      errEl.textContent = (!fname || !lname)
+        ? 'Please enter your first and last name.'
+        : 'Please enter a valid email address.';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    errEl.classList.add('hidden');
+
+    const { total, label } = computeResult();
+
+    const payload = {
+      firstName: fname,
+      lastName: lname,
+      email: email,
+      phone: phone,
+      company: company,
+      result_level: label,
+      result_score: total,
+      assessment_responses: buildSummary(label, total)
+    };
+
+    const btn = document.getElementById('gateSubmitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    try {
+      await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {
+      // Non-blocking: still show the visitor their results even if the send fails
+      console.error('Assessment submission failed to send:', e);
+    }
+
+    showResults();
+  }
+
+  function showResults() {
+    const { key } = computeResult();
     const r = results[key];
 
     document.getElementById('progressBar').style.width = '100%';
