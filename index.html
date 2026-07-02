@@ -397,6 +397,85 @@
       max-width: 560px;
     }
 
+    /* ── RESULT TIER SCALE ─────────────────────────── */
+
+    .tier-scale { margin: 4px 0 36px; }
+
+    .tier-scale-head {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 22px;
+    }
+
+    .tier-track {
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .tier-track::before {
+      content: "";
+      position: absolute;
+      top: 8px;
+      left: 12.5%;
+      right: 12.5%;
+      height: 2px;
+      background: var(--border);
+    }
+
+    .tier-fill {
+      position: absolute;
+      top: 8px;
+      height: 2px;
+      background: var(--blue);
+    }
+
+    .tier {
+      position: relative;
+      flex: 1;
+      text-align: center;
+    }
+
+    .tier .dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--white);
+      border: 2px solid var(--border);
+      margin: 0 auto 12px;
+      position: relative;
+      z-index: 1;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .tier.past .dot { background: var(--blue); border-color: var(--blue); }
+
+    .tier.active .dot {
+      background: var(--blue);
+      border-color: var(--blue);
+      box-shadow: 0 0 0 5px rgba(74,159,212,0.18);
+    }
+
+    .tier .name {
+      font-size: 12px;
+      line-height: 1.35;
+      color: var(--muted);
+      padding: 0 4px;
+    }
+
+    .tier.active .name { color: var(--near-black); font-weight: 500; }
+
+    .tier-ends {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
     .hidden { display: none; }
 
     @media (max-width: 640px) {
@@ -405,6 +484,8 @@
       .nav-row { flex-direction: column; align-items: flex-start; }
       .btn { width: 100%; text-align: center; }
       .btn-ghost { width: auto; }
+      .tier .name { font-size: 10.5px; }
+      .tier-ends { font-size: 10px; }
     }
   </style>
 </head>
@@ -759,7 +840,7 @@
 
   function buildSummary(label, total) {
     const r = results[getResultKey(total)];
-    let out = 'YOUR RESULT: ' + label + ' (total score ' + total + ' of 45)\n\n';
+    let out = 'YOUR RESULT: ' + label + '\n\n';
     r.narrative.forEach(p => { out += p + '\n\n'; });
     out += 'WHAT THIS SUGGESTS\n';
     r.findings.forEach(f => { out += '- ' + f + '\n'; });
@@ -783,7 +864,7 @@
       n++;
       const a = answers[i];
       out += 'Q' + n + '. ' + q.question + '\n-> '
-        + (a ? a.text + ' (score ' + a.score + ')' : '(no answer)') + '\n\n';
+        + (a ? a.text : '(no answer)') + '\n\n';
     });
     return out.trim();
   }
@@ -838,6 +919,8 @@
     showResults();
   }
 
+  const resultOrder = ['carrying', 'patching', 'functioning', 'clear'];
+
   function showResults() {
     const { key } = computeResult();
     const r = results[key];
@@ -845,9 +928,32 @@
     document.getElementById('progressBar').style.width = '100%';
     const el = document.getElementById('results');
 
+    const activeIndex = resultOrder.indexOf(key);
+    const fillLeft = (0.5 / resultOrder.length) * 100;
+    const fillWidth = ((activeIndex + 0.5) / resultOrder.length) * 100 - fillLeft;
+    const scaleHTML = `
+      <div class="tier-scale">
+        <div class="tier-scale-head">Where you landed</div>
+        <div class="tier-track">
+          <div class="tier-fill" style="left:${fillLeft}%; width:${fillWidth}%;"></div>
+          ${resultOrder.map((k, i) => `
+            <div class="tier ${i < activeIndex ? 'past' : ''} ${i === activeIndex ? 'active' : ''}">
+              <div class="dot"></div>
+              <div class="name">${results[k].label}</div>
+            </div>`).join('')}
+        </div>
+        <div class="tier-ends">
+          <span>More support needed</span>
+          <span>Operating at a high level</span>
+        </div>
+      </div>
+    `;
+
     el.innerHTML = `
       <div class="result-label">Your Result</div>
       <h2 class="result-headline">${r.label}</h2>
+
+      ${scaleHTML}
 
       <div class="result-card">
         <div class="level-tag">${r.label}</div>
@@ -910,7 +1016,6 @@
 
     writeLabel('Your Result');
     writeHeading(label, 15);
-    writeLabel('Total score: ' + total + ' of 45');
     r.narrative.forEach(p => writeBody(p));
     writeLabel('What this suggests');
     r.findings.forEach(f => writeBody('- ' + f));
@@ -927,7 +1032,7 @@
       } else if (q.type === 'scored') {
         n++;
         writeLabel('Q' + n + '. ' + q.question);
-        writeBody((a ? a.text : '(no answer)') + (a && a.score != null ? '  (score ' + a.score + ' of 5)' : ''));
+        writeBody(a ? a.text : '(no answer)');
       }
     });
 
