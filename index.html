@@ -468,14 +468,6 @@
 
     .tier.active .name { color: var(--near-black); font-weight: 500; }
 
-    .tier-ends {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 16px;
-      font-size: 11px;
-      color: var(--muted);
-    }
-
     .hidden { display: none; }
 
     @media (max-width: 640px) {
@@ -485,7 +477,6 @@
       .btn { width: 100%; text-align: center; }
       .btn-ghost { width: auto; }
       .tier .name { font-size: 10.5px; }
-      .tier-ends { font-size: 10px; }
     }
   </style>
 </head>
@@ -941,10 +932,6 @@
               <div class="dot"></div>
               <div class="name">${results[k].label}</div>
             </div>`).join('')}
-        </div>
-        <div class="tier-ends">
-          <span>More support needed</span>
-          <span>Operating at a high level</span>
         </div>
       </div>
     `;
