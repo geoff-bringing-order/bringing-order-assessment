@@ -154,6 +154,16 @@
   let current = 0;
   const responses = {}; // keyed by step id
 
+  // ---- Custom survey → GHL wiring (shared "Custom Surveys — Intake" workflow) ----
+  const SURVEY_CONFIG = {
+    surveyName: "Precision Home Specialists — Goals & Priorities",
+    webhookUrl: "https://services.leadconnectorhq.com/hooks/d9WyNmOEFZOkAWyXfeJA/webhook-trigger/9085a68e-e023-43f9-b9a4-c080ac881963",
+    respondents: {
+      "Ricky": { firstName: "Ricky", lastName: "Shivers", email: "ricky@precisionhomespecialists.com" },
+      "Faith": { firstName: "Faith", lastName: "Shivers", email: "faith@precisionhomespecialists.com" }
+    }
+  };
+
   // ---- Steps ----
   const steps = [
     { id: 'impact', type: 'multifield', label: 'Impact', title: 'How do you want your business to be identified?',
@@ -355,24 +365,64 @@
     document.getElementById('survey').classList.add('hidden');
     const el = document.getElementById('final');
     el.classList.remove('hidden');
+
+    submitToGHL();
+
     el.innerHTML = `
       <div class="done-icon">&#10003;</div>
       <h2 class="intro-headline" style="font-size: clamp(24px, 3vw, 32px);">That's it. Thank you, ${respondentName}.</h2>
-      <p class="final-body">Your answers are ready. Download the PDF below and then send to Geoff.</p>
+      <p class="final-body">Your responses have been submitted to Geoff. There's nothing else you need to do.</p>
+      <p class="final-body">If you'd like a copy for your own records, you can download a PDF below.</p>
 
-      <button class="btn btn-primary" onclick="downloadPDF()">Download PDF Summary</button>
-
-      <div class="email-box">
-        <strong>Next step:</strong> Once your PDF has downloaded, attach it to an email and send it to<br><strong>geoff@bringingorder.com</strong>.
-      </div>
-
-      <ul class="steps-list">
-        <li>Click the button above to download your PDF.</li>
-        <li>Open your email and start a new message to geoff@bringingorder.com.</li>
-        <li>Attach the downloaded PDF file.</li>
-        <li>Send it. No need to write anything else, the PDF has everything.</li>
-      </ul>
+      <button class="btn btn-primary" onclick="downloadPDF()">Download a copy (PDF)</button>
     `;
+  }
+
+  function buildResponsesText() {
+    let out = 'SURVEY: ' + SURVEY_CONFIG.surveyName + '\n';
+    out += 'COMPLETED BY: ' + respondentName + '\n';
+    out += 'DATE: ' + new Date().toLocaleDateString() + '\n\n';
+    steps.forEach(s => {
+      if (s.type === 'multifield') {
+        out += (s.title || s.label).toUpperCase() + '\n';
+        s.fields.forEach(f => {
+          const v = responses[f.key];
+          out += 'Q: ' + f.label + '\n-> ' + (v && v.trim() ? v.trim() : '(no answer)') + '\n\n';
+        });
+      } else if (s.type === 'issue') {
+        const t = responses[s.id + '_text'];
+        out += s.label.toUpperCase() + ' — ' + s.title + '\n';
+        out += 'Priority (1-5): ' + (responses[s.id + '_score'] || '(not rated)') + '\n';
+        out += 'Details: ' + (t && t.trim() ? t.trim() : '(no answer)') + '\n\n';
+      }
+    });
+    return out.trim();
+  }
+
+  async function submitToGHL() {
+    const c = (SURVEY_CONFIG.respondents && SURVEY_CONFIG.respondents[respondentName]) || {};
+    const text = buildResponsesText();
+    const payload = {
+      survey_name: SURVEY_CONFIG.surveyName,
+      respondent_name: respondentName || '',
+      firstName: c.firstName || respondentName || '',
+      lastName: c.lastName || '',
+      email: c.email || '',
+      phone: '',
+      responses: text,
+      responses_html: text
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/\n/g, '<br>')
+    };
+    try {
+      await fetch(SURVEY_CONFIG.webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {
+      console.error('Custom survey submission failed to send:', e);
+    }
   }
 
   function downloadPDF() {
